@@ -26,7 +26,13 @@ class _NewItemScreenState extends State<NewItemScreen> {
                   label: Text('Name'),
                 ),
                 validator: (value) {
-                  if (value == null || value.isEmpty) return 'Error message';
+                  if (value == null ||
+                      value.isEmpty ||
+                      int.tryParse(value) == null ||
+                      int.tryParse(value)! <= 0) {
+                    return 'Must be a valid, positive number.';
+                  }
+                  return null;
                 },
               ),
               Row(
