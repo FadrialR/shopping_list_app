@@ -26,7 +26,7 @@ class _NewItemScreenState extends State<NewItemScreen> {
                   label: Text('Name'),
                 ),
                 validator: (value) {
-                  return 'Demo...';
+                  if (value == null || value.isEmpty) return 'Error message';
                 },
               ),
               Row(
