@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shopping_list_app/data/categories.dart';
 import 'package:shopping_list_app/models/category.dart';
+import 'package:shopping_list_app/models/grocery_item.dart';
 
 class NewItemScreen extends StatefulWidget {
   const NewItemScreen({super.key});
@@ -18,6 +19,14 @@ class _NewItemScreenState extends State<NewItemScreen> {
   void _saveItem() {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
+      Navigator.of(context).pop(
+        GroceryItem(
+          id: DateTime.now().toString(),
+          name: _enteredName,
+          quantity: _enteredQuantity,
+          category: _selectedCategory,
+        ),
+      );
     }
   }
 
@@ -41,8 +50,8 @@ class _NewItemScreenState extends State<NewItemScreen> {
                 validator: (value) {
                   if (value == null ||
                       value.isEmpty ||
-                      int.tryParse(value) == null ||
-                      int.tryParse(value)! <= 0) {
+                      value.trim().length <= 1 ||
+                      value.trim().length >= 50) {
                     return 'Must be between 1 and 50 characters.';
                   }
                   return null;
