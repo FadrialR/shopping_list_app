@@ -17,6 +17,7 @@ class GroceryList extends StatefulWidget {
 class _GroceryListState extends State<GroceryList> {
   List<GroceryItem> _groceryItems = [];
   var _isLoading = true;
+  String? _error;
 
   @override
   void initState() {
@@ -28,6 +29,13 @@ class _GroceryListState extends State<GroceryList> {
     final url = Uri.https(
         'flutter-prep-79247-default-rtdb.firebaseio.com', 'shopping-list.json');
     final response = await http.get(url);
+
+    if (response.statusCode >= 400) {
+      setState(() {
+        _error = 'Failed to fetch data. Please try again later';
+      });
+    }
+
     final Map<String, dynamic> listData = json.decode(response.body);
     final List<GroceryItem> loadedItems = [];
     for (final item in listData.entries) {
@@ -64,11 +72,16 @@ class _GroceryListState extends State<GroceryList> {
     });
   }
 
-  // void _removeItem(GroceryItem item) {
-  //   setState(() {
-  //     _groceryItems.remove(item);
-  //   });
-  // }
+  void _removeItem(GroceryItem item) async {
+    final url = Uri.https('flutter-prep-79247-default-rtdb.firebaseio.com',
+        'shopping-list/${item.id}.json');
+
+    http.delete(url);
+
+    setState(() {
+      _groceryItems.remove(item);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -86,28 +99,31 @@ class _GroceryListState extends State<GroceryList> {
       content = ListView.builder(
         itemCount: _groceryItems.length,
         itemBuilder: (ctx, index) => ListTile(
-            title: Text(_groceryItems[index].name),
-            leading: Container(
-              width: 24,
-              height: 24,
-              color: _groceryItems[index].category.color,
-            ),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  _groceryItems[index].quantity.toString(),
-                ),
-                IconButton(
-                  onPressed: () {
-                    setState(() {
-                      _groceryItems.removeAt(index);
-                    });
-                  },
-                  icon: const Icon(Icons.delete),
-                )
-              ],
-            )),
+          title: Text(_groceryItems[index].name),
+          leading: Container(
+            width: 24,
+            height: 24,
+            color: _groceryItems[index].category.color,
+          ),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                _groceryItems[index].quantity.toString(),
+              ),
+              IconButton(
+                onPressed: () => _removeItem(_groceryItems[index]),
+                icon: const Icon(Icons.delete),
+              )
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (_error != null) {
+      content = Center(
+        child: Text(_error!),
       );
     }
 
